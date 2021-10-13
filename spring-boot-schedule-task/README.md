@@ -7,7 +7,8 @@ $ spring init -d=web -g=com.nobrand -a=spring-boot-schedule-task spring-boot-sch
 ```
 
 ## Scheduled Task 생성
-`@Scheduled` annotation 을 사용해서 Scheduled Task 를 정의합니다.<br>
+`@Scheduled` annotation 을 사용해서 Scheduled Task 의 함수를 정의합니다.<br>
+해당 Class 는 `@Component` annotation 을 통해서 Bean 으로 인식하도록 합니다. (singleton) <br>
 Scheduling 과 관련된 조건을 설정하기 위한 다양한 옵션들이 존재합니다.<br>
 
 |option    |description                                                         |
@@ -28,6 +29,24 @@ public @interface Scheduled {
     long fixedRate() default -1L;
     long initialDelay() default -1L;
     TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
+}
+```
+`@Component` annotation 에 이름을 부여하는게 아니면 (value = ), 클래스명의 camelCase 가 Bean ID 로 지정됩니다.
+```json
+{
+   contexts: {
+      application: {
+         beans: {
+            scheduledTask: {
+               aliases: [ ],
+               scope: "singleton",
+               type: "com.nobrand.springbootscheduletask.ScheduledTask",
+               resource: "URL [jar:file:...!/BOOT-INF/classes!/com/nobrand/springbootscheduletask/ScheduledTask.class]",
+               dependencies: [ ]
+            }
+         }
+      }
+   }
 }
 ```
 
