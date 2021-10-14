@@ -123,7 +123,65 @@ $ java -jar target/spring-boot-schedule-task-0.0.1-SNAPSHOT.jar
 2021-10-13 14:11:18.793  INFO 2261 --- [   scheduling-1] c.n.s.ScheduledTask                      : 14:11:18
 2021-10-13 14:11:23.793  INFO 2261 --- [   scheduling-1] c.n.s.ScheduledTask                      : 14:11:23
 ```
-Scheduled Task 는 background thread 에서 실행됩니다.
+
+Scheduled Task 는 background thread 에서 실행됩니다.<br>
+세부정보는 Actuator 를 통해서 확인합니다. Scheduled Task 의 Bean 등록 여부와 할당된 Thread 정보를 알 수 있습니다.<br>
+
+```javascript
+# http://localhost:8080/actuator/scheduledtasks
+{
+  cron: [ ],
+  fixedDelay: [ ],
+  fixedRate: [
+    {
+      runnable: {
+        target: "com.nobrand.springbootscheduletask.ScheduledTask.reportCurrentTime"
+      },
+      initialDelay: 0,
+      interval: 5000
+    }
+  ],
+  custom: [ ]
+}
+
+# http://localhost:8080/actuator/configprops
+{
+  contexts: {
+    application: {
+      beans: {
+        spring.task.scheduling-org.springframework.boot.autoconfigure.task.TaskSchedulingProperties: {
+          prefix: "spring.task.scheduling",
+          properties: {
+            pool: {
+              size: 1
+            },
+            threadNamePrefix: "scheduling-",
+            shutdown: {
+              awaitTermination: false
+            }
+          }
+        },
+        spring.task.execution-org.springframework.boot.autoconfigure.task.TaskExecutionProperties: {
+          prefix: "spring.task.execution",
+          properties: {
+            pool: {
+              queueCapacity: 2147483647,
+              coreSize: 8,
+              maxSize: 2147483647,
+              allowCoreThreadTimeout: true,
+              keepAlive: "PT1M"
+            },
+            threadNamePrefix: "task-",
+            shutdown: {
+              awaitTermination: false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
 
 ## Test
 `@SpringBootTest` annotation 을 이용해서 유닛테스트를 작성합니다.
