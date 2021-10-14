@@ -123,8 +123,107 @@ $ java -jar target/spring-boot-schedule-task-0.0.1-SNAPSHOT.jar
 2021-10-13 14:11:18.793  INFO 2261 --- [   scheduling-1] c.n.s.ScheduledTask                      : 14:11:18
 2021-10-13 14:11:23.793  INFO 2261 --- [   scheduling-1] c.n.s.ScheduledTask                      : 14:11:23
 ```
-Scheduled Task 는 background thread 에서 실행됩니다.
+
+Scheduled Task 는 background thread 에서 실행됩니다.<br>
+세부정보는 Actuator 를 통해서 확인합니다. Scheduled Task 의 Bean 등록 여부와 할당된 Thread 정보를 알 수 있습니다.<br>
+
+```javascript
+# http://localhost:8080/actuator/scheduledtasks
+{
+  cron: [ ],
+  fixedDelay: [ ],
+  fixedRate: [
+    {
+      runnable: {
+        target: "com.nobrand.springbootscheduletask.ScheduledTask.reportCurrentTime"
+      },
+      initialDelay: 0,
+      interval: 5000
+    }
+  ],
+  custom: [ ]
+}
+
+# http://localhost:8080/actuator/configprops
+{
+  contexts: {
+    application: {
+      beans: {
+        spring.task.scheduling-org.springframework.boot.autoconfigure.task.TaskSchedulingProperties: {
+          prefix: "spring.task.scheduling",
+          properties: {
+            pool: {
+              size: 1
+            },
+            threadNamePrefix: "scheduling-",
+            shutdown: {
+              awaitTermination: false
+            }
+          }
+        },
+        spring.task.execution-org.springframework.boot.autoconfigure.task.TaskExecutionProperties: {
+          prefix: "spring.task.execution",
+          properties: {
+            pool: {
+              queueCapacity: 2147483647,
+              coreSize: 8,
+              maxSize: 2147483647,
+              allowCoreThreadTimeout: true,
+              keepAlive: "PT1M"
+            },
+            threadNamePrefix: "task-",
+            shutdown: {
+              awaitTermination: false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Test
+`@SpringBootTest` annotation 을 이용해서 유닛테스트를 작성합니다.
+
+|Spring Boot version|Junit|필요한 annotations             |
+|-------------------|-----|-------------------------------|
+|v2.0               |4.x  |`@RunWith(SpringRunner.class)` |
+|v2.1 이후          |5.x  |`@SpringBootTest`              |
+
+JUnit 4.x 에서는 테스트 러너를 확장하는 방법으로 `@RunWith` 를 사용했습니다.<br>
+JUnit 5.x 에서는 Extension 이란 일관된 방법으로 (`@ExtendWith`) 테스트 실행방법을 커스터마이징 합니다.
+`@ExtendWith` 가 가지는 `@RunWith` 대비 장점은 다음과 같습니다.
+ - Meta Annotation 지원 (`@SpringBootTest` annotation 이 `@ExtendWith(SpringExtension.class)` 를 내부적으로 선언)
+ - 여러번 중복해서 사용 가능
+
+```java
+package org.springframework.boot.test.context;
+
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@BootstrapWith(SpringBootTestContextBootstrapper.class)
+@ExtendWith({SpringExtension.class})
+public @interface SpringBootTest { }
+```
+
+Mockito: 테스트 환경 (Database, API) 을 구성하는데 많은 수고가 들어가게 되는데, 이를 해결하기 위해 등장했습니다. <br>
+ - `Mockito.mock`: Mock 객체 생성
+ - `Mockito.when` 기대행위 정의 
+
+Mockito 기본전략은 `Answer.RETURNS_DEFAULTS` 라서 Stub 되지 않은 메소드는 아무일없이 진행됩니다.
+
+|annotation     |area             |description                                                                                                                                                                   |
+|---------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`@Mock`        |Mockito internal |`Mockito.mock` 대신 객체생성에 활용                                                                                                                                           |
+|`@InjectMocks` |Mockito internal |`@Mock` 으로 만들어진 객체를 사용해서 객체를 생성할때 사용                                                                                                                    |
+|`@Spy`         |Mockito internal |Stub 전략을 변경해서, Stub 되지 않은 메소드는 실제 구현된 내용을 사용                                                                                                         |
+|`@MockBean`    |Spring Context   |`@Mock` 과 동일한 역할. Spring Context 에 mock 객체를 등록해서, @Autowired 동작 가능<br> - `@Mock` -> `@InjectMocks`<br> - `@MockBean` -> `@Autowired` (in `@SpringBootTest`) |
+|`@SpyBean`     |Spring Context   |`@MockBean` 에서 Spy 개념만 (Mockito 기본전략, Stub 되지 않은 메소드는 실제 구현으로 동작하도록 함) 적용<br> 단, 실제 구현체가 반드시 Spring Context 에 등록되어 있어야 함    |
 
 ## Reference
 1. [Guide, Scheduling Tasks](https://spring.io/guides/gs/scheduling-tasks/)
 2. [Enable Scheduling Annotations](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#scheduling-annotation-support)
+3. [Mockito Annotation Description](https://cobbybb.tistory.com/16)
