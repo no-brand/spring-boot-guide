@@ -37,6 +37,7 @@ Advice 는 가장 specific 한 것을 선택하는게 잠재적인 에러를 보
 Advice 에는 실행조건에 해당하는 `Pointcut` 이 필요합니다. 이는 annotation 이나 method 를 명시할 수 있습니다.
  - annotation : "@annotation(PACKAGE.AnnotationClass)"
  - method : "execution(* PACKAGE.Class.Method(..))"
+ - path : "within(PACKAGE..*)"
 
 ```java
 public class BaseController {
