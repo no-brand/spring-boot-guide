@@ -1,5 +1,6 @@
 package com.nobrand.springbootscheduletask;
 
+import com.nobrand.springbootscheduletask.task.ScheduledTask;
 import org.awaitility.Duration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

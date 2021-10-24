@@ -1,4 +1,4 @@
-package com.nobrand.springbootscheduletask;
+package com.nobrand.springbootscheduletask.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
