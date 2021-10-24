@@ -1,5 +1,6 @@
 package com.nobrand.springbootscheduletask.task;
 
+import com.nobrand.springbootscheduletask.aspect.MeasureConsumedTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,8 +17,9 @@ public class ScheduledTask {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
+    @MeasureConsumedTime
     @Scheduled(fixedRate = 5000)
-    public void reportCurrentTime() {
+    public void reportCurrentTime() throws Exception {
         log.info(dateFormat.format(new Date()));
     }
 
