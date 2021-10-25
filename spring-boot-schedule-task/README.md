@@ -40,8 +40,8 @@ public @interface Scheduled {
             scheduledTask: {
                aliases: [ ],
                scope: "singleton",
-               type: "com.nobrand.springbootscheduletask.ScheduledTask",
-               resource: "URL [jar:file:...!/BOOT-INF/classes!/com/nobrand/springbootscheduletask/ScheduledTask.class]",
+               type: "com.nobrand.springbootscheduletask.task.ScheduledTask",
+               resource: "URL [jar:file:...!/BOOT-INF/classes!/com/nobrand/springbootscheduletask/task/ScheduledTask.class]",
                dependencies: [ ]
             }
          }
@@ -135,7 +135,7 @@ Scheduled Task 는 background thread 에서 실행됩니다.<br>
   fixedRate: [
     {
       runnable: {
-        target: "com.nobrand.springbootscheduletask.ScheduledTask.reportCurrentTime"
+        target: "com.nobrand.springbootscheduletask.task.ScheduledTask.reportCurrentTime"
       },
       initialDelay: 0,
       interval: 5000
